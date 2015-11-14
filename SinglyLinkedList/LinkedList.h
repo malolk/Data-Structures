@@ -23,6 +23,11 @@ class LinkedList
 public:
 	LinkedList():head(new class Node<T>()) {};
 	LinkedList(std::initializer_list<T> l);
+	LinkedList(const LinkedList&);
+	LinkedList& operator==(const LinkedList&);
+	LinkedList(LinkedList&&) noexcept;
+	LinkedList& operator==(LinkedList&&) noexcept;
+
 	bool isEmpty();
 	bool isLast(Node<T>* p);
 	void delElemOnce(T elem);
@@ -35,7 +40,62 @@ private:
 	Node<T> *head = nullptr;	
 };
 
+template <typename T>
+LinkedList<T>::LinkedList(const LinkedList& rhs)
+{
+	head = new class Node<T>();
+	auto node = rhs.head;
+	if(!node->next) 
+		return;
+	else
+		node = node->next; 
+	while(node)
+	{
+		insertElem(node->val, head);
+		node = node->next;
+	}
+}
 
+template <typename T>
+LinkedList<T>::LinkedList(LinkedList&& rhs) noexcept
+{
+	head = new class Node<T>();
+	if(!rhs.head) return;
+	head->next = rhs.head->next;
+	rhs.head->next = nullptr;	
+}
+
+template <typename T>
+LinkedList<T>& LinkedList<T>::operator==(const LinkedList& rhs)
+{
+	if(head != rhs.head)
+	{
+		deleteList();
+		head = new class Node<T>();
+		auto node = rhs.head;
+		if(!node || !node->next)
+			return *this;
+		node = node->next;
+		while(node)
+		{
+			insertElem(node->val, head);
+			node = node->next;
+		}			
+	}
+	return *this;	
+}
+template <typename T>
+LinkedList<T>& LinkedList<T>::operator==(LinkedList&& rhs) noexcept
+{
+	if(head != rhs.head)
+	{
+		deleteList();
+		head = new class Node<T>();
+		head->next = rhs.head->next;
+		rhs.head->next = nullptr;
+	}	
+	return *this;
+}
 template <typename T>
 std::ostream& operator<<(std::ostream &out, LinkedList<T> &l)
 {
