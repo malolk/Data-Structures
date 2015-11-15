@@ -5,11 +5,9 @@
 LinkedList<unsigned> circleCreate(unsigned N)
 {
 	LinkedList<unsigned> ret;
-	while(N > 0)
-	{
-		ret.insertElem(N, ret.header());
-		--N;	
-	}		
+	unsigned cnt = 1;
+	while(cnt <= N)
+		ret.insertElem(cnt++);	
 	return ret;	
 }
 
@@ -51,6 +49,7 @@ int main(int argc, char** argv)
 	unsigned M = stoi(std::string(argv[1]));
 	unsigned N = stoi(std::string(argv[2]));
 	LinkedList<unsigned> lst = circleCreate(N);
+	std::cout << lst;
 	Josephus(lst, M);
 
 	return 0;

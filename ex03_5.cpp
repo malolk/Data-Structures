@@ -57,8 +57,8 @@ LinkedList<T> listOr(LinkedList<T> &lst1, LinkedList<T> &lst2)
 }
 int main()
 {
-	LinkedList<int> lst1{5, 4, 3, 2, 1};	
-	LinkedList<int> lst2{7, 5, 0};	
+	LinkedList<int> lst1{1, 2, 3, 4, 5};	
+	LinkedList<int> lst2{0, 5, 7};	
 	std::cout << lst1;
 	std::cout << lst2;
 	LinkedList<int> lst3 = listOr(lst1, lst2);

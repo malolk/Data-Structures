@@ -27,7 +27,8 @@ void printLots(LinkedList<T> &l1, LinkedList<T> &l2)
 int main()
 {
 	LinkedList<int> lst{10, 6, 3, 7, 8, 2, 5, 12};	
-	LinkedList<int> lst2{6, 5, 3, 2};
+	//! lst2 assumed to be in ascending order.
+	LinkedList<int> lst2{2, 3, 5, 6};
 	std::cout << lst; 
 	std::cout << lst2;
 	printLots(lst, lst2);

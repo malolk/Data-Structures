@@ -21,7 +21,7 @@ class LinkedList
 	friend Node<T>* findPreElem<T>(T elem, Node<T>* node);
 	friend std::ostream& operator<<<T>(std::ostream &out, LinkedList<T> &l);
 public:
-	LinkedList():head(new class Node<T>()) {};
+	LinkedList():head(new class Node<T>()) { last = head; };
 	LinkedList(std::initializer_list<T> l);
 	LinkedList(const LinkedList&);
 	LinkedList& operator==(const LinkedList&);
@@ -33,17 +33,23 @@ public:
 	void delElemOnce(T elem);
 	void delElemAll(T elem);
 	void insertElem(T elem, Node<T>* p);
+	void insertElem(T elem);
 	void deleteList();
+	void appendNode(Node<T>* n);
 	Node<T>* header() {return head;}
 	~LinkedList();
 private:
-	Node<T> *head = nullptr;	
+	Node<T>* delNode(T elem, Node<T> *node);
+	Node<T> *head = nullptr;
+	Node<T> *last = nullptr;	
 };
+
 
 template <typename T>
 LinkedList<T>::LinkedList(const LinkedList& rhs)
 {
 	head = new class Node<T>();
+	last = head;
 	auto node = rhs.head;
 	if(!node->next) 
 		return;
@@ -51,15 +57,28 @@ LinkedList<T>::LinkedList(const LinkedList& rhs)
 		node = node->next; 
 	while(node)
 	{
-		insertElem(node->val, head);
+		insertElem(node->val);
 		node = node->next;
 	}
+}
+
+template <typename T>
+void LinkedList<T>::appendNode(Node<T>* n)
+{
+	auto last = head;
+	while(last->next != nullptr)
+		last = last->next;
+	last->next = n;
+	//n->next = nullptr;
+	last = n;
+	last->next = nullptr;	
 }
 
 template <typename T>
 LinkedList<T>::LinkedList(LinkedList&& rhs) noexcept
 {
 	head = new class Node<T>();
+	last = rhs.last;
 	if(!rhs.head) return;
 	head->next = rhs.head->next;
 	rhs.head->next = nullptr;	
@@ -72,13 +91,14 @@ LinkedList<T>& LinkedList<T>::operator==(const LinkedList& rhs)
 	{
 		deleteList();
 		head = new class Node<T>();
+		last = head;
 		auto node = rhs.head;
 		if(!node || !node->next)
 			return *this;
 		node = node->next;
 		while(node)
 		{
-			insertElem(node->val, head);
+			insertElem(node->val);
 			node = node->next;
 		}			
 	}
@@ -91,6 +111,7 @@ LinkedList<T>& LinkedList<T>::operator==(LinkedList&& rhs) noexcept
 	{
 		deleteList();
 		head = new class Node<T>();
+		last = rhs.last;
 		head->next = rhs.head->next;
 		rhs.head->next = nullptr;
 	}	
@@ -144,7 +165,7 @@ Node<T>* findPreElem(T elem, Node<T> *firstNode)
 	return nullptr;
 }
 template <typename T>
-Node<T>* delNode(T elem, Node<T> *node)
+Node<T>* LinkedList<T>::delNode(T elem, Node<T> *node)
 {
 	if(!node || !node->next)
 		return nullptr;
@@ -153,6 +174,8 @@ Node<T>* delNode(T elem, Node<T> *node)
 		return nullptr;
 	auto tmpNode = preNode->next;
 	preNode->next = tmpNode->next;
+	if(last == tmpNode)
+		last = preNode;
 	delete tmpNode;
 	return preNode;
 }
@@ -184,6 +207,14 @@ void LinkedList<T>::insertElem(T elem, Node<T>* p)
 	newNode->val = elem;
 	newNode->next = p->next;
 	p->next = newNode;
+	if(p == last)
+		last = newNode;
+}
+
+template <typename T>
+void LinkedList<T>::insertElem(T elem)
+{
+	insertElem(elem, last);	
 }
 
 template <typename T>
@@ -195,6 +226,7 @@ void LinkedList<T>::deleteList()
 		delete head;
 		head = node;	
 	}
+	last = head;
 }
 template <typename T>
 LinkedList<T>::~LinkedList()
@@ -205,9 +237,10 @@ LinkedList<T>::~LinkedList()
 template <typename T>
 LinkedList<T>::LinkedList(std::initializer_list<T> l)
 {
-	this->head = new class Node<T>();			
+	head = new class Node<T>();			
+	last = head;
 	for(auto &it : l)
-		insertElem(it, this->head);
+		insertElem(it);
 }
 #endif
 
