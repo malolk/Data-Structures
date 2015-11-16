@@ -10,13 +10,13 @@ void radix_sort(std::vector<listPtr> &array, listPtr numbers)
 	auto buf = array;
 	//! assumed Bucket be 10 , pass = 3;
 	auto pre = numbers->header();
-	auto node = pre->next;
+	auto node = numbers->first();
 	pre->next = nullptr;
 	if(!node)
 		return;
 	while(node)
 	{
-		auto tmp = node->next;
+		auto tmp = numbers->next(node);
 		array[node->val%bucket]->appendNode(node);	
 		node = tmp;
 	}

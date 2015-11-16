@@ -36,6 +36,11 @@ public:
 	void insertElem(T elem);
 	void deleteList();
 	void appendNode(Node<T>* n);
+	void check_last();
+	Node<T>* next(Node<T> *p) { return  ((p&&p->next) ? p->next : nullptr); }
+	T val(Node<T> *p) { return p->val; }
+	Node<T>* delNode(Node<T> *node);
+	Node<T>* first() { return head->next; }
 	Node<T>* header() {return head;}
 	~LinkedList();
 private:
@@ -44,6 +49,13 @@ private:
 	Node<T> *last = nullptr;	
 };
 
+template <typename T>
+void LinkedList<T>::check_last()
+{
+	last = head;
+	while(last->next)
+		last = last->next;
+}
 
 template <typename T>
 LinkedList<T>::LinkedList(const LinkedList& rhs)
@@ -65,9 +77,7 @@ LinkedList<T>::LinkedList(const LinkedList& rhs)
 template <typename T>
 void LinkedList<T>::appendNode(Node<T>* n)
 {
-	auto last = head;
-	while(last->next != nullptr)
-		last = last->next;
+	check_last();
 	last->next = n;
 	//n->next = nullptr;
 	last = n;
@@ -179,7 +189,18 @@ Node<T>* LinkedList<T>::delNode(T elem, Node<T> *node)
 	delete tmpNode;
 	return preNode;
 }
-
+template <typename T>
+Node<T>* LinkedList<T>::delNode(Node<T> *node)
+{
+	if(!node || !node->next)
+		return node;
+	auto tmp = node->next;	
+	node->next = tmp->next;
+	if(last == tmp)
+		last = node;
+	delete tmp;
+	return node;
+}
 template <typename T>
 void LinkedList<T>::delElemOnce(T elem)
 {

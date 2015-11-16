@@ -15,30 +15,28 @@ void Josephus(LinkedList<unsigned> &lst, unsigned M)
 {
 	unsigned m = M;
 	auto pre = lst.header();
-	auto node = pre->next; 
+	auto node = lst.next(pre); 
 	while(m >= 0)
 	{
-		if(lst.header()->next->next == nullptr)
+		if(lst.isLast(lst.first()))
 			break;
 		if(m == 0)
 		{
-			auto tmp = node;
-			std::cout << node->val << " ";
-			pre->next = node->next;
-			node = node->next;
-			delete tmp;
+			std::cout << lst.val(node) << " ";
+			pre = lst.delNode(pre);
+			node = lst.next(pre);
 			m = M;
 		}		
 		else
 		{
 			pre = node;
-			node = node->next;	
+			node = lst.next(pre);
 			--m;
 		}
 		if(!node)
 		{
 			pre = lst.header();
-			node = pre->next;	
+			node = lst.first();	
 		}
 	}	
 }

@@ -7,8 +7,8 @@ void reverseList(LinkedList<T> &lst)
 {
 	auto head = lst.header();
 	if(!head) return;
-	auto node = head->next;
-	if(!node || !node->next) return;
+	auto node = lst.first();
+	if(!node || !lst.next(node)) return;
 
 	auto leftNode = node, rightNode = node;
 	leftNode = nullptr;
@@ -20,6 +20,7 @@ void reverseList(LinkedList<T> &lst)
 		node = rightNode;		
 	}
 	head->next = leftNode;
+	lst.check_last();
 }
 
 int main()
