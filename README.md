@@ -1,1 +1,1 @@
-# Implemented data structures in "Data Structures and Algorithm Analysis in c" using C++.
+# Implement data structures in "Data Structures and Algorithm Analysis in c" using C++.
