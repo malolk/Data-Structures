@@ -1,2 +1,1 @@
-# My Answers to <<Data Structures and Algorithm Analysis in c>>
-# But implemented in C++ 
+# Implemented data structures in "Data Structures and Algorithm Analysis in c" using C++.
