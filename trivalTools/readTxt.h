@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 std::vector<std::string> 
 readStringInTxt(const std::string &path)
@@ -18,6 +19,36 @@ readStringInTxt(const std::string &path)
 	return retStr;	
 }
 
+void splitString(const std::string &str, std::vector<std::string> &vecOfStr, char c = ' ')
+{
+	char chrIn;
+	std::istringstream strStream(str);
+	std::string strBuffer = "";
+	while((chrIn = strStream.get()))
+	{
+		if(chrIn == c || chrIn == '\n' || chrIn == EOF)
+		{
+			if(!strBuffer.empty())
+			{
+				vecOfStr.push_back(strBuffer);
+				strBuffer.clear();
+			}
+			if(chrIn == EOF)
+				break;
+		}	
+		else
+			strBuffer.insert(strBuffer.end(), chrIn);	
+	}
+}
+
+
+void splitStr2Int(const std::string &str, std::vector<int> &vecInt, char c = ' ')
+{
+	std::vector<std::string> vecStr;
+	splitString(str, vecStr, c);
+	for(const auto &str : vecStr)
+		vecInt.push_back(std::stoi(str));	
+}
 std::vector<std::string> 
 readStringInTerminal()
 {

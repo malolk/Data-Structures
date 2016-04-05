@@ -11,24 +11,26 @@ class DisjointSet
 public:
 	DisjointSet(int num)
 	{
-		disjointSet = (0, num);	
-	}
+		disjointSet = std::vector<int>(num, -1);
+    }	
 	void SetUnion(int s1, int s2)
 	{
-		if(disjointSet[s1] < disjointSet[s2])
-			disjointSet[s2] = s1;
+		int u = FindSetName(s1);
+		int v = FindSetName(s2);
+		if(disjointSet[u] < disjointSet[v])
+			disjointSet[v] = u;
 		else
 		{
-			if(disjointSet[s1] == disjointSet[s2])
-				disjointSet[s2]--;
-			disjointSet[s1] = s2;
+			if(disjointSet[u] == disjointSet[v])
+				disjointSet[v]--;
+			disjointSet[u] = v;
 		}
 	}
 
 	int FindSetName(int s)
 	{
-		if(disjointSet[s] <= 0)
-			return disjointSet[s];
+		if(disjointSet[s] < 0)
+			return s;
 		else
 			return FindSetName(disjointSet[s]);
 	}
