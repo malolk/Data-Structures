@@ -3,6 +3,7 @@
 
 #include "Graph.h"
 #include <vector>
+#include <set>
 #include <algorithm>
 #include "../Queue/QueueInArray.h"
 #include "../DisjointSet/DisjointSet.h"
@@ -10,18 +11,6 @@
 namespace GraphAlgo
 {
 
-int FindVetexOfInDegreeZero(std::vector<int> &inDegree, int vetexNum)
-{
-	for(int cnt = 0; cnt < vetexNum; ++cnt)
-	{
-		if(inDegree[cnt] == 0)
-		{
-			inDegree[cnt] = -1;
-			return cnt;	
-		}
-	}	
-	return -1;
-}
 
 
 class PathLog
@@ -56,6 +45,104 @@ void InitializeEdgesLog(EdgesLog *pEdge, Graph::Node **lst, int vetexNum, std::v
 			pNode = pNode->next;
 		}
 	}
+}
+
+void driverOfDFS(int vetex, Graph::Node **lst, std::vector<int> &visited)
+{
+	if(visited[vetex]) return;
+	visited[vetex] = 1;
+	Graph::Node *pNode = lst[vetex];
+	std::cout << vetex << " ";
+	while(pNode != nullptr)
+	{
+		driverOfDFS(pNode->orderNum, lst, visited);
+		pNode = pNode->next;
+	}
+}
+void DFS(Graph::Graph &g, int startNode)
+{
+	int vetexNum = g.GetVetexNum();
+	int edgeNum = g.GetEdgeNum();
+	Graph::Node **lst = g.GetAdjLst();
+	std::vector<int> visited(vetexNum, 0);
+	driverOfDFS(startNode, lst, visited);
+}
+
+void assignNum(int vetex, Graph::Node **lst, std::vector<int> &visited, std::vector<int> &parent, std::vector<int> &child, std::vector<int> &num)
+{ 
+	static int cnt = 0;
+	visited[vetex] = 1;
+	Graph::Node *pNode = lst[vetex];	
+	num[vetex] = cnt++;
+	std::cout << vetex << "\n";
+	while(pNode != nullptr)
+	{
+		if(!visited[pNode->orderNum])
+		{
+			parent[pNode->orderNum] = vetex;
+			child[vetex]++;
+			assignNum(pNode->orderNum, lst, visited, parent, child, num);
+		}
+		pNode = pNode->next;
+	}
+}
+
+void assignLow(int vetex, Graph::Node **lst, std::vector<int> &parent, std::vector<int> &child, std::vector<int> &num, std::vector<int> &low, std::vector<bool> &artNode)
+{
+	low[vetex] = num[vetex];
+	Graph::Node *pNode = lst[vetex];	
+	while(pNode != nullptr)
+	{
+		int m = pNode->orderNum;
+		if(num[pNode->orderNum] > num[vetex] && parent[pNode->orderNum] == vetex)
+		{
+			assignLow(pNode->orderNum, lst, parent, child, num, low, artNode);
+			if(parent[vetex] == vetex)
+			{
+				if(child[vetex] >= 2)
+					artNode[vetex] = true; 
+			}
+			else if(low[pNode->orderNum] >= num[vetex] && child[vetex] >= 1)
+					artNode[vetex] = true; 
+			low[vetex] = ((low[vetex] < low[pNode->orderNum]) ? low[vetex] : low[pNode->orderNum]); 	
+		}
+		else if(num[pNode->orderNum] > num[vetex] && parent[pNode->orderNum] != vetex)
+		{
+			low[pNode->orderNum] = ((num[vetex] < low[pNode->orderNum]) ? num[vetex] : low[pNode->orderNum]); 	
+		}
+		pNode = pNode->next;	
+	}
+}
+
+void FindArticulation(Graph::Graph &g, int startNode)
+{
+	int vetexNum = g.GetVetexNum();
+	int edgeNum = g.GetEdgeNum();
+	Graph::Node **lst = g.GetAdjLst();
+	std::vector<int> visited(vetexNum, 0);		
+	std::vector<int> parent(vetexNum, 0);	
+	std::vector<int> child(vetexNum, 0);	
+	std::vector<int> num(vetexNum, 0);	
+	std::vector<int> low(vetexNum, 0);
+	std::vector<bool> artNode(vetexNum, false);
+	assignNum(startNode, lst, visited, parent, child, num);
+	std::cout << "num \n";
+	for(auto &i : num)
+		std::cout << i << " ";
+	std::cout << std::endl;
+	std::cout << "parent \n";
+	for(auto &i : parent)
+		std::cout << i << " ";
+	std::cout << std::endl;
+	std::cout << "child \n";
+	for(auto &i : child)
+		std::cout << i << " ";
+	std::cout << std::endl;
+
+	assignLow(startNode, lst, parent, child, num, low, artNode);
+	for(int i = 0; i < vetexNum; ++i)
+		if(artNode[i])
+			std::cout << "vetex " << i << " is an articulation node\n";
 }
 
 void Kruskal(Graph::Graph &g)
@@ -269,31 +356,113 @@ void InitializeInDegree(std::vector<int> &inDegree, Graph::Node **lst, int vetex
 	}
 }
 
+int FindVetexOfInDegreeZero(std::vector<int> &zeroDegreeBuf, int &front)
+{
+	return zeroDegreeBuf[front++];
+}
+
 void TopologicalSort(Graph::Graph &g)
 {
 	int vetexNum = g.GetVetexNum();
 	Graph::Node **lst = g.GetAdjLst();
 	std::vector<int> orderingNum;
 	std::vector<int> inDegree(vetexNum, 0);
+	std::vector<int> zeroDegreeBuf;
+	int front = 0;
 	InitializeInDegree(inDegree, lst, vetexNum);
 	for(int i = 0; i < vetexNum; ++i)
 	{
-		int zeroInDegree = 0;
-		if((zeroInDegree = FindVetexOfInDegreeZero(inDegree, vetexNum)) == -1)
-		{
-			std::cerr << "Graph is not acyclic\n";
-			return; 	
-		}
+		if(inDegree[i] == 0)
+			zeroDegreeBuf.push_back(i);
+	}
+	
+	while(front < zeroDegreeBuf.size())
+	{
+		int zeroInDegree = FindVetexOfInDegreeZero(zeroDegreeBuf, front);
 		orderingNum.push_back(zeroInDegree);
 		Graph::Node *pNode = lst[zeroInDegree];
 		while(pNode != nullptr)
 		{
-			inDegree[pNode->orderNum]--;
+			if(--inDegree[pNode->orderNum] == 0)
+				zeroDegreeBuf.push_back(pNode->orderNum);
 			pNode = pNode->next;	
 		}
 	}
+	if(front != vetexNum)
+	{
+		std::cout << "Graph is not acyclic.\n";
+	}
 	for(const auto &elem : orderingNum)
 		std::cout << elem << " ";
+	std::cout << std::endl;
+}
+
+
+inline int maxInt(int cmp1, int cmp2)
+{
+	return (cmp1 > cmp2 ? cmp1 : cmp2);
+}
+
+inline int minInt(int cmp1, int cmp2)
+{
+	return (cmp1 < cmp2 ? cmp1 : cmp2);
+}
+
+void CriticalPath(Graph::Graph &g, int startNode, int endNode)
+{
+	int vetexNum = g.GetVetexNum();
+	Graph::Node **lst = g.GetAdjLst();
+	std::vector<int> orderingNum;
+	std::vector<int> zeroDegreeBuf;
+	int front = 0;
+	std::vector<int> inDegree(vetexNum, 0);
+	std::vector<int> delayStart(vetexNum, 0);
+	std::vector<int> delayEnd(vetexNum, 1 << 30);
+	std::vector<std::vector<int>> backTrace(vetexNum);
+	InitializeInDegree(inDegree, lst, vetexNum);
+	delayStart[startNode] = delayEnd[startNode] = 0;
+	for(int i = 0; i < vetexNum; ++i)
+	{
+		if(inDegree[i] == 0)
+			zeroDegreeBuf.push_back(i);
+	}
+	while(front < zeroDegreeBuf.size())
+	{
+		int zeroInDegree = FindVetexOfInDegreeZero(zeroDegreeBuf, front);
+		orderingNum.push_back(zeroInDegree);
+		Graph::Node *pNode = lst[zeroInDegree];
+		while(pNode != nullptr)
+		{
+			backTrace[pNode->orderNum].push_back(zeroInDegree);
+			int tmpDelay = delayStart[zeroInDegree] + pNode->weight;
+			delayStart[pNode->orderNum] = maxInt(tmpDelay, delayStart[pNode->orderNum]);
+			if(--inDegree[pNode->orderNum] == 0)
+				zeroDegreeBuf.push_back(pNode->orderNum);
+			pNode = pNode->next;	
+		}
+	}
+	if(front != vetexNum)
+	{
+		std::cout << "Graph is not acyclic.\n";
+	}
+	delayEnd[endNode] = delayStart[endNode];
+	for(int i = vetexNum-1; i > 0; --i)
+	{
+		Graph::Node *pNode;
+		for(const auto &backTraceElem : backTrace[i])
+		{
+			pNode = lst[backTraceElem];
+			while(pNode->orderNum != i)
+				pNode = pNode->next;
+			delayEnd[backTraceElem] = minInt(delayEnd[backTraceElem], delayEnd[i] - pNode->weight);			
+		}
+	}
+
+	for(int i = 0; i < vetexNum; ++i)
+	{
+		if(delayStart[i] == delayEnd[i])
+			std::cout << i << " ";	
+	}
 	std::cout << std::endl;
 }
 
